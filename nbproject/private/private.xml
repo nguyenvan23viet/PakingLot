@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/E:/project_prj/pakingLot/web/staff.jsp</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/dao/VehicleDAO.java</file>
+            <file>file:/E:/project_prj/pakingLot/web/WEB-INF/ConnectDB.properties</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/model/ParkingSlot.java</file>
+            <file>file:/E:/project_prj/pakingLot/web/customer.jsp</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/model/User.java</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/dao/NewClass.java</file>
+            <file>file:/E:/project_prj/pakingLot/web/amin.jsp</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/dao/ParkingSlotDAO.java</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/model/ParkingRate.java</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/model/ParkingTicket.java</file>
+            <file>file:/E:/project_prj/pakingLot/web/META-INF/context.xml</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/model/Vehicle.java</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/dao/DBContext.java</file>
+            <file>file:/E:/project_prj/pakingLot/web/index.html</file>
+            <file>file:/E:/project_prj/pakingLot/src/java/dao/UserDAO.java</file>
+        </group>
+    </open-files>
+</project-private>
