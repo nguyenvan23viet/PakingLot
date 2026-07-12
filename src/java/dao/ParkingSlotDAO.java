@@ -2,6 +2,7 @@ package dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import model.ParkingSlot;
@@ -21,9 +22,9 @@ public class ParkingSlotDAO extends DBContext {
             = "SELECT SlotID, SlotCode, SlotType, Status FROM ParkingSlots "
             + "WHERE SlotType = ? AND Status = 'EMPTY' ORDER BY SlotCode ASC";
 
-    private static final String SEARCH_BY_CODE_STATUS
+    private static final String SEARCH_SLOTS
             = "SELECT SlotID, SlotCode, SlotType, Status FROM ParkingSlots "
-            + "WHERE SlotCode LIKE ? AND Status LIKE ? ORDER BY SlotCode ASC";
+            + "WHERE SlotCode LIKE ? AND (Status = ? OR ? = '') ORDER BY SlotCode ASC";
 
     private static final String INSERT_SLOT
             = "INSERT INTO ParkingSlots (SlotCode, SlotType, Status) VALUES (?, ?, ?)";
@@ -45,7 +46,7 @@ public class ParkingSlotDAO extends DBContext {
                 list.add(mapSlot(rs));
             }
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO getAllSlots error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.getAllSlots error: " + e.getMessage());
         }
         return list;
     }
@@ -59,11 +60,12 @@ public class ParkingSlotDAO extends DBContext {
                 }
             }
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO getSlotByID error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.getSlotByID error: " + e.getMessage());
         }
         return null;
     }
 
+    /** Used by Staff during check-in to pick an available slot for a vehicle type. */
     public List<ParkingSlot> getEmptySlotsByType(String slotType) {
         List<ParkingSlot> list = new ArrayList<>();
         try (PreparedStatement ps = connection.prepareStatement(SELECT_EMPTY_BY_TYPE)) {
@@ -74,25 +76,27 @@ public class ParkingSlotDAO extends DBContext {
                 }
             }
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO getEmptySlotsByType error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.getEmptySlotsByType error: " + e.getMessage());
         }
         return list;
     }
 
+    /** Pass an empty string for status to search across both EMPTY and OCCUPIED. */
     public List<ParkingSlot> searchSlots(String keyword, String status) {
         List<ParkingSlot> list = new ArrayList<>();
-        String kw = (keyword == null || keyword.trim().isEmpty()) ? "" : keyword.trim();
-        String st = (status == null || status.trim().isEmpty()) ? "" : status.trim();
-        try (PreparedStatement ps = connection.prepareStatement(SEARCH_BY_CODE_STATUS)) {
+        String kw = (keyword == null) ? "" : keyword.trim();
+        String st = (status == null) ? "" : status.trim();
+        try (PreparedStatement ps = connection.prepareStatement(SEARCH_SLOTS)) {
             ps.setString(1, "%" + kw + "%");
-            ps.setString(2, "%" + st + "%");
+            ps.setString(2, st);
+            ps.setString(3, st);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapSlot(rs));
                 }
             }
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO searchSlots error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.searchSlots error: " + e.getMessage());
         }
         return list;
     }
@@ -104,7 +108,7 @@ public class ParkingSlotDAO extends DBContext {
             ps.setString(3, s.getStatus());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO insertSlot error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.insertSlot error: " + e.getMessage());
         }
         return false;
     }
@@ -117,21 +121,19 @@ public class ParkingSlotDAO extends DBContext {
             ps.setInt(4, s.getSlotID());
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO updateSlot error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.updateSlot error: " + e.getMessage());
         }
         return false;
     }
 
-    /**
-     * Convenience method to flip a slot's status, used during check-in/check-out.
-     */
-    public boolean updateStatus(int slotID, String status) {
+    /** Called by TicketServlet's check-in/check-out flow to flip a slot's availability. */
+    public boolean updateSlotStatus(int slotID, String status) {
         try (PreparedStatement ps = connection.prepareStatement(UPDATE_STATUS)) {
             ps.setString(1, status);
             ps.setInt(2, slotID);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO updateStatus error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.updateSlotStatus error: " + e.getMessage());
         }
         return false;
     }
@@ -141,12 +143,12 @@ public class ParkingSlotDAO extends DBContext {
             ps.setInt(1, slotID);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("ParkingSlotDAO deleteSlot error: " + e.getMessage());
+            System.out.println("ParkingSlotDAO.deleteSlot error: " + e.getMessage());
         }
         return false;
     }
 
-    private ParkingSlot mapSlot(ResultSet rs) throws Exception {
+    private ParkingSlot mapSlot(ResultSet rs) throws SQLException {
         return new ParkingSlot(
                 rs.getInt("SlotID"),
                 rs.getString("SlotCode"),

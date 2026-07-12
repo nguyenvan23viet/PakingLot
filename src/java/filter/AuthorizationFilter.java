@@ -37,6 +37,12 @@ public class AuthorizationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse resp = (HttpServletResponse) response;
 
+        // CRITICAL for Vietnamese text: must set this BEFORE any request.getParameter(...)
+        // is called anywhere downstream, otherwise POST form data with dau (Vietnamese
+        // diacritics) gets decoded with the wrong charset and turns into garbled characters.
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html;charset=UTF-8");
+
         String contextPath = req.getContextPath();
         String uri = req.getRequestURI();
         String path = uri.substring(contextPath.length()); // e.g. "/admin/home.jsp"
@@ -77,6 +83,8 @@ public class AuthorizationFilter implements Filter {
         return path.equals("/")
                 || path.equals("/index.jsp")
                 || path.startsWith("/LoginServlet")
+                || path.startsWith("/RegisterServlet")
+                || path.equals("/register.jsp")
                 || path.startsWith("/css/")
                 || path.startsWith("/js/")
                 || path.startsWith("/images/");
